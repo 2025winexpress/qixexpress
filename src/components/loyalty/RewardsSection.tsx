@@ -30,9 +30,11 @@ interface RewardCard {
 
 interface RewardsSectionProps {
   rewardCards?: RewardCard[];
+  onBack?: () => void;
 }
 
 const RewardsSection: React.FC<RewardsSectionProps> = ({
+  onBack = () => {},
   rewardCards = [
     {
       id: "reward1",
@@ -136,7 +138,7 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({
           <Award className="mr-2 text-green-600" />
           بطاقات المكافآت
         </h2>
-        <Button className="bg-green-600 hover:bg-green-700">
+        <Button className="bg-green-600 hover:bg-green-700" onClick={onBack}>
           <Plus className="mr-2 h-4 w-4" />
           إضافة بطاقة جديدة
         </Button>
@@ -161,8 +163,8 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-green-800 flex items-center">
-                      <Coffee className="mr-2 h-5 w-5 text-green-600" />
-                      {card.name}
+                      <Award className="mr-2 h-5 w-5 text-green-600" />
+                      {card.id} - {card.name}
                     </h3>
                     <span className="text-sm font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
                       {card.currentStamps}/{card.maxStamps} طوابع
@@ -195,7 +197,7 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({
                         key={index}
                         className={`flex items-center justify-center w-6 h-6 rounded-full ${index < card.currentStamps ? "bg-green-600 text-white" : "bg-gray-200 text-gray-400"}`}
                       >
-                        <Coffee size={12} />
+                        <Award size={12} />
                       </div>
                     ))}
                   </div>
@@ -219,7 +221,21 @@ const RewardsSection: React.FC<RewardsSectionProps> = ({
                     </div>
                   )}
 
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-between">
+                    <Button
+                      onClick={() => {
+                        toast({
+                          title: "كيفية استخدام البطاقة",
+                          description:
+                            "المرحلة الأولى: قم بالطلب عبر التطبيق. المرحلة الثانية: قم بتحديد البطاقة في قسم برنامج الولاء في السلة. المرحلة الثالثة: سيتم إضافة طابع مع الطلب.",
+                          variant: "default",
+                        });
+                      }}
+                      variant="outline"
+                      className="text-green-600 border-green-600"
+                    >
+                      كيفية الاستخدام
+                    </Button>
                     <Button
                       onClick={() => handleActivateStamp(card)}
                       className="bg-green-600 hover:bg-green-700"

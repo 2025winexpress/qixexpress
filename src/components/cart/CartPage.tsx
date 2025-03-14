@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../loyalty/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,13 @@ import {
   Minus,
   Coins,
   Gift,
-  Coffee,
   ArrowRight,
+  ShoppingCart,
+  Clock,
+  Calendar,
+  CheckCircle,
+  CreditCard,
+  Award,
 } from "lucide-react";
 import MobileNavigation from "../layout/MobileNavigation";
 import { useToast } from "@/components/ui/use-toast";
@@ -28,6 +33,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 
 interface CartItem {
   id: string;
@@ -49,8 +58,26 @@ interface LoyaltyCard {
   expiryDate?: string;
 }
 
+interface DeliveryTimeSlot {
+  id: string;
+  time: string;
+  available: boolean;
+}
+
 const CartPage = () => {
   const { toast } = useToast();
+
+  // User information (mock data)
+  const userData = {
+    name: "جين سميث",
+    level: "عضو ذهبي",
+    points: 1250,
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
+    notificationCount: 3,
+    phone: "0612345678",
+    address: "شارع الحسن الثاني، رقم 123، الدار البيضاء",
+  };
+
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: "item1",
@@ -108,8 +135,8 @@ const CartPage = () => {
     },
   ]);
 
-  const [selectedRewardCard, setSelectedRewardCard] = useState<string>("");
-  const [selectedGiftCard, setSelectedGiftCard] = useState<string>("");
+  const [selectedRewardCard, setSelectedRewardCard] = useState<string>("none");
+  const [selectedGiftCard, setSelectedGiftCard] = useState<string>("none");
   const [coinsToUse, setCoinsToUse] = useState<number>(0);
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [checkoutInfo, setCheckoutInfo] = useState({
@@ -117,16 +144,52 @@ const CartPage = () => {
     phone: "",
     address: "",
   });
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
-  // User information (mock data)
-  const userData = {
-    name: "Jane Smith",
-    level: "Gold Member",
-    points: 1250,
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
-    notificationCount: 3,
-  };
+  // Update checkout info with user data once it's available
+  useEffect(() => {
+    setCheckoutInfo({
+      name: userData.name || "",
+      phone: userData.phone || "",
+      address: userData.address || "",
+    });
+  }, [userData]);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isLoyaltyConfirmed, setIsLoyaltyConfirmed] = useState(false);
+  const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
+
+  // Delivery time slots
+  const timeSlots: DeliveryTimeSlot[] = [
+    { id: "slot1", time: "9:00 - 10:00", available: true },
+    { id: "slot2", time: "10:00 - 11:00", available: true },
+    { id: "slot3", time: "11:00 - 12:00", available: true },
+    { id: "slot4", time: "12:00 - 13:00", available: false },
+    { id: "slot5", time: "13:00 - 14:00", available: true },
+    { id: "slot6", time: "14:00 - 15:00", available: true },
+    { id: "slot7", time: "15:00 - 16:00", available: true },
+    { id: "slot8", time: "16:00 - 17:00", available: true },
+  ];
+
+  // Set default delivery time to 30 minutes from now
+  useEffect(() => {
+    // Find the next available time slot that's at least 30 minutes from now
+    const now = new Date();
+    const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000);
+    const hour = thirtyMinutesLater.getHours();
+    const minutes = thirtyMinutesLater.getMinutes();
+
+    // Find the closest available time slot
+    const availableSlots = timeSlots.filter((slot) => slot.available);
+    if (availableSlots.length > 0) {
+      setSelectedTimeSlot(availableSlots[0].id);
+    }
+  }, []);
+
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "coins">("cash");
+  const [requestStamp, setRequestStamp] = useState(false);
+  const [requestReward, setRequestReward] = useState(false);
 
   const handleNavigate = (
     view: "discovery" | "dashboard" | "wallet" | "store" | "home",
@@ -167,7 +230,7 @@ const CartPage = () => {
     let discount = 0;
 
     // Gift card discount
-    if (selectedGiftCard) {
+    if (selectedGiftCard && selectedGiftCard !== "none" && isLoyaltyConfirmed) {
       const giftCard = giftCards.find((card) => card.id === selectedGiftCard);
       if (giftCard) {
         discount += giftCard.value;
@@ -175,7 +238,9 @@ const CartPage = () => {
     }
 
     // Coins discount (assuming 1 coin = 0.1 MAD)
-    discount += coinsToUse * 0.1;
+    if (isLoyaltyConfirmed) {
+      discount += coinsToUse * 0.1;
+    }
 
     return Math.min(discount, calculateSubtotal());
   };
@@ -199,9 +264,27 @@ const CartPage = () => {
       return;
     }
 
+    if (!selectedTimeSlot) {
+      toast({
+        title: "وقت التوصيل",
+        description: "يرجى اختيار وقت التوصيل",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Process checkout
     setIsCheckoutDialogOpen(false);
     setIsSuccessDialogOpen(true);
+  };
+
+  const handleConfirmLoyalty = () => {
+    setIsLoyaltyConfirmed(true);
+    toast({
+      title: "تم تأكيد برنامج الولاء",
+      description: "تم تطبيق خصومات برنامج الولاء على طلبك",
+      variant: "default",
+    });
   };
 
   const handleWhatsAppConfirmation = () => {
@@ -214,23 +297,33 @@ const CartPage = () => {
       .join("\n");
 
     const loyaltyDetails = [];
-    if (selectedRewardCard) {
+    if (
+      selectedRewardCard &&
+      selectedRewardCard !== "none" &&
+      isLoyaltyConfirmed
+    ) {
       const rewardCard = rewardsCards.find(
         (card) => card.id === selectedRewardCard,
       );
       if (rewardCard) {
         loyaltyDetails.push(`بطاقة المكافآت: ${rewardCard.name}`);
+        if (requestStamp) {
+          loyaltyDetails.push(`طلب طابع جديد`);
+        }
+        if (requestReward) {
+          loyaltyDetails.push(`طلب مكافأة`);
+        }
       }
     }
 
-    if (selectedGiftCard) {
+    if (selectedGiftCard && selectedGiftCard !== "none" && isLoyaltyConfirmed) {
       const giftCard = giftCards.find((card) => card.id === selectedGiftCard);
       if (giftCard) {
         loyaltyDetails.push(`بطاقة الهدية: ${giftCard.name}`);
       }
     }
 
-    if (coinsToUse > 0) {
+    if (coinsToUse > 0 && isLoyaltyConfirmed) {
       loyaltyDetails.push(`الكوينز المستخدمة: ${coinsToUse}`);
     }
 
@@ -238,7 +331,12 @@ const CartPage = () => {
       ? "\n\nتفاصيل برنامج الولاء:\n" + loyaltyDetails.join("\n")
       : "";
 
-    const message = `طلب جديد:\n\nالاسم: ${checkoutInfo.name}\nالهاتف: ${checkoutInfo.phone}\nالعنوان: ${checkoutInfo.address}\n\nالمنتجات:\n${orderDetails}\n\nالمجموع الفرعي: ${calculateSubtotal()} درهم\nالخصم: ${calculateDiscount()} درهم\nالإجمالي: ${calculateTotal()} درهم${loyaltyDetailsText}`;
+    const deliverySlot = timeSlots.find((slot) => slot.id === selectedTimeSlot);
+    const deliveryInfo = `\n\nموعد التوصيل: ${selectedDeliveryDate} ${deliverySlot ? deliverySlot.time : ""}`;
+
+    const paymentInfo = `\n\nطريقة الدفع: ${paymentMethod === "cash" ? "نقداً" : "كوينز"}`;
+
+    const message = `طلب جديد:\n\nالاسم: ${checkoutInfo.name}\nالهاتف: ${checkoutInfo.phone}\nالعنوان: ${checkoutInfo.address}${deliveryInfo}\n\nالمنتجات:\n${orderDetails}\n\nالمجموع الفرعي: ${calculateSubtotal()} درهم\nالخصم: ${calculateDiscount()} درهم\nالإجمالي: ${calculateTotal()} درهم${loyaltyDetailsText}${paymentInfo}`;
 
     // Encode the message for WhatsApp
     const encodedMessage = encodeURIComponent(message);
@@ -353,10 +451,81 @@ const CartPage = () => {
                 </div>
               </div>
 
+              {/* Delivery Options */}
               <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
                 <h2 className="text-lg font-semibold mb-4 text-right">
-                  برنامج الولاء
+                  <Clock className="inline-block ml-2 text-gray-600" />
+                  خيارات التوصيل
                 </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-right mb-2">
+                      تاريخ التوصيل
+                    </label>
+                    <div className="flex justify-end">
+                      <Input
+                        type="date"
+                        value={selectedDeliveryDate}
+                        onChange={(e) =>
+                          setSelectedDeliveryDate(e.target.value)
+                        }
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full text-right"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-right mb-2">
+                      وقت التوصيل
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {timeSlots.map((slot) => (
+                        <div key={slot.id} className="text-right">
+                          <Button
+                            type="button"
+                            variant={
+                              selectedTimeSlot === slot.id
+                                ? "default"
+                                : "outline"
+                            }
+                            className={`w-full ${!slot.available ? "opacity-50 cursor-not-allowed" : ""} ${selectedTimeSlot === slot.id ? "bg-green-600 hover:bg-green-700" : ""}`}
+                            disabled={!slot.available}
+                            onClick={() => setSelectedTimeSlot(slot.id)}
+                          >
+                            {slot.time}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Loyalty Program */}
+              <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <Button
+                    variant={isLoyaltyConfirmed ? "default" : "outline"}
+                    className={`${isLoyaltyConfirmed ? "bg-green-600 hover:bg-green-700" : "border-green-600 text-green-600"}`}
+                    onClick={handleConfirmLoyalty}
+                    disabled={isLoyaltyConfirmed}
+                  >
+                    {isLoyaltyConfirmed ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        تم تأكيد برنامج الولاء
+                      </>
+                    ) : (
+                      "تأكيد استخدام برنامج الولاء"
+                    )}
+                  </Button>
+                  <h2 className="text-lg font-semibold text-right">
+                    <Gift className="inline-block ml-2 text-green-600" />
+                    برنامج الولاء
+                  </h2>
+                </div>
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-right mb-2">
@@ -365,23 +534,83 @@ const CartPage = () => {
                     <Select
                       value={selectedRewardCard}
                       onValueChange={setSelectedRewardCard}
+                      disabled={isLoyaltyConfirmed}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="اختر بطاقة المكافآت" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">لا شيء</SelectItem>
+                        <SelectItem value="none">لا شيء</SelectItem>
                         {rewardsCards.map((card) => (
                           <SelectItem key={card.id} value={card.id}>
-                            {card.name} ({card.value}/{card.maxValue} طوابع)
+                            {card.name} - {card.id} ({card.value}/
+                            {card.maxValue} طوابع)
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {selectedRewardCard && (
-                      <div className="mt-2 flex items-center justify-end text-sm text-green-600">
-                        <Coffee className="h-4 w-4 ml-1" />
-                        طلب طابع لهذه البطاقة
+
+                    {selectedRewardCard && selectedRewardCard !== "none" && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                            {rewardsCards.find(
+                              (card) => card.id === selectedRewardCard,
+                            )?.value || 0}
+                            /
+                            {rewardsCards.find(
+                              (card) => card.id === selectedRewardCard,
+                            )?.maxValue || 10}{" "}
+                            طوابع
+                          </span>
+                          <h3 className="font-medium text-gray-700 text-right">
+                            <Award className="inline-block ml-1 h-4 w-4 text-green-600" />
+                            تفاصيل البطاقة
+                          </h3>
+                        </div>
+
+                        <Progress
+                          value={
+                            ((rewardsCards.find(
+                              (card) => card.id === selectedRewardCard,
+                            )?.value || 0) /
+                              (rewardsCards.find(
+                                (card) => card.id === selectedRewardCard,
+                              )?.maxValue || 10)) *
+                            100
+                          }
+                          className="h-2 mb-3"
+                        />
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-end space-x-2 rtl:space-x-reverse">
+                            <Label htmlFor="request-stamp" className="text-sm">
+                              طلب طابع جديد مع هذا الطلب
+                            </Label>
+                            <Checkbox
+                              id="request-stamp"
+                              checked={requestStamp}
+                              onCheckedChange={(checked) =>
+                                setRequestStamp(checked === true)
+                              }
+                              disabled={isLoyaltyConfirmed}
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-end space-x-2 rtl:space-x-reverse">
+                            <Label htmlFor="request-reward" className="text-sm">
+                              طلب مكافأة (إذا كان عدد الطوابع كافياً)
+                            </Label>
+                            <Checkbox
+                              id="request-reward"
+                              checked={requestReward}
+                              onCheckedChange={(checked) =>
+                                setRequestReward(checked === true)
+                              }
+                              disabled={isLoyaltyConfirmed}
+                            />
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -393,19 +622,46 @@ const CartPage = () => {
                     <Select
                       value={selectedGiftCard}
                       onValueChange={setSelectedGiftCard}
+                      disabled={isLoyaltyConfirmed}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="اختر بطاقة الهدية" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">لا شيء</SelectItem>
+                        <SelectItem value="none">لا شيء</SelectItem>
                         {giftCards.map((card) => (
                           <SelectItem key={card.id} value={card.id}>
-                            {card.name} ({card.value} درهم)
+                            {card.name} - {card.id} ({card.value} درهم)
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+
+                    {selectedGiftCard && selectedGiftCard !== "none" && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                            {giftCards.find(
+                              (card) => card.id === selectedGiftCard,
+                            )?.value || 0}{" "}
+                            درهم
+                          </span>
+                          <h3 className="font-medium text-gray-700 text-right">
+                            <Gift className="inline-block ml-1 h-4 w-4 text-purple-600" />
+                            تفاصيل البطاقة
+                          </h3>
+                        </div>
+                        <div className="mt-2 flex items-center justify-end text-sm text-gray-600">
+                          <Calendar className="h-3 w-3 ml-1" />
+                          صالحة حتى:{" "}
+                          {
+                            giftCards.find(
+                              (card) => card.id === selectedGiftCard,
+                            )?.expiryDate
+                          }
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -422,13 +678,58 @@ const CartPage = () => {
                         min="0"
                         max={userData.points}
                         className="w-full"
+                        disabled={isLoyaltyConfirmed}
                       />
                       <div className="ml-2 flex items-center text-yellow-600">
                         <Coins className="h-4 w-4 ml-1" />
                       </div>
                     </div>
+                    {coinsToUse > 0 && (
+                      <p className="text-xs text-gray-500 mt-1 text-right">
+                        قيمة الكوينز: {(coinsToUse * 0.1).toFixed(2)} درهم (1
+                        كوين = 0.1 درهم)
+                      </p>
+                    )}
                   </div>
                 </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                <h2 className="text-lg font-semibold mb-4 text-right">
+                  <CreditCard className="inline-block ml-2 text-gray-600" />
+                  طريقة الدفع
+                </h2>
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(value) =>
+                    setPaymentMethod(value as "cash" | "coins")
+                  }
+                  className="space-y-3"
+                >
+                  <div className="flex items-center justify-end space-x-2 rtl:space-x-reverse">
+                    <Label htmlFor="payment-cash" className="text-right">
+                      الدفع نقداً عند الاستلام
+                    </Label>
+                    <RadioGroupItem value="cash" id="payment-cash" />
+                  </div>
+                  <div className="flex items-center justify-end space-x-2 rtl:space-x-reverse">
+                    <Label htmlFor="payment-coins" className="text-right">
+                      الدفع باستخدام الكوينز ({calculateTotal() * 10} كوين)
+                    </Label>
+                    <RadioGroupItem
+                      value="coins"
+                      id="payment-coins"
+                      disabled={userData.points < calculateTotal() * 10}
+                    />
+                  </div>
+                </RadioGroup>
+                {paymentMethod === "coins" && (
+                  <p className="text-sm text-yellow-600 mt-2 text-right">
+                    <Coins className="inline-block ml-1 h-3 w-3" />
+                    سيتم خصم {calculateTotal() * 10} كوين من رصيدك
+                  </p>
+                )}
               </div>
             </div>
 
@@ -455,6 +756,25 @@ const CartPage = () => {
                     <span>{calculateCoinPrice()} كوينز</span>
                   </div>
                 </div>
+
+                {selectedTimeSlot && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                    <div className="flex items-center justify-end text-sm">
+                      <span>
+                        {
+                          timeSlots.find((slot) => slot.id === selectedTimeSlot)
+                            ?.time
+                        }
+                      </span>
+                      <Clock className="ml-1 h-4 w-4 text-gray-600" />
+                    </div>
+                    <div className="flex items-center justify-end text-sm mt-1">
+                      <span>{selectedDeliveryDate}</span>
+                      <Calendar className="ml-1 h-4 w-4 text-gray-600" />
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   className="w-full mt-4 bg-green-600 hover:bg-green-700"
                   onClick={handleCheckout}
@@ -533,6 +853,19 @@ const CartPage = () => {
                   <span>{calculateTotal()} درهم</span>
                   <span>الإجمالي</span>
                 </div>
+                <div className="mt-2 pt-1 border-t">
+                  <div className="flex justify-between">
+                    <span>{selectedDeliveryDate}</span>
+                    <span>تاريخ التوصيل</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>
+                      {timeSlots.find((slot) => slot.id === selectedTimeSlot)
+                        ?.time || "لم يتم التحديد"}
+                    </span>
+                    <span>وقت التوصيل</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -572,9 +905,52 @@ const CartPage = () => {
               <p className="text-sm">الاسم: {checkoutInfo.name}</p>
               <p className="text-sm">الهاتف: {checkoutInfo.phone}</p>
               <p className="text-sm">العنوان: {checkoutInfo.address}</p>
+              <p className="text-sm">التاريخ: {selectedDeliveryDate}</p>
+              <p className="text-sm">
+                الوقت:{" "}
+                {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.time}
+              </p>
               <p className="text-sm font-medium mt-2">
                 الإجمالي: {calculateTotal()} درهم
               </p>
+              <p className="text-sm">
+                طريقة الدفع:{" "}
+                {paymentMethod === "cash" ? "نقداً عند الاستلام" : "كوينز"}
+              </p>
+
+              {isLoyaltyConfirmed && (
+                <div className="mt-2 pt-2 border-t">
+                  <p className="text-sm font-medium">تفاصيل برنامج الولاء:</p>
+                  {selectedRewardCard && selectedRewardCard !== "none" && (
+                    <>
+                      <p className="text-xs">
+                        بطاقة المكافآت:{" "}
+                        {
+                          rewardsCards.find(
+                            (card) => card.id === selectedRewardCard,
+                          )?.name
+                        }{" "}
+                        (رقم البطاقة: {selectedRewardCard})
+                      </p>
+                      {requestStamp && <p className="text-xs">طلب طابع جديد</p>}
+                      {requestReward && <p className="text-xs">طلب مكافأة</p>}
+                    </>
+                  )}
+                  {selectedGiftCard && selectedGiftCard !== "none" && (
+                    <p className="text-xs">
+                      بطاقة الهدية:{" "}
+                      {
+                        giftCards.find((card) => card.id === selectedGiftCard)
+                          ?.name
+                      }{" "}
+                      (رقم البطاقة: {selectedGiftCard})
+                    </p>
+                  )}
+                  {coinsToUse > 0 && (
+                    <p className="text-xs">الكوينز المستخدمة: {coinsToUse}</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

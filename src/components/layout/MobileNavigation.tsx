@@ -1,14 +1,47 @@
 import React from "react";
-import { Home, ShoppingBag, Gift, Wallet, ShoppingCart } from "lucide-react";
+import {
+  Home,
+  ShoppingBag,
+  Gift,
+  Wallet,
+  ShoppingCart,
+  User,
+} from "lucide-react";
 
 interface MobileNavigationProps {
-  activeTab?: "home" | "store" | "loyalty" | "wallet" | "cart";
-  onNavigate?: (tab: "home" | "store" | "loyalty" | "wallet" | "cart") => void;
+  activeTab?: "home" | "store" | "loyalty" | "wallet" | "cart" | "profile";
+  onNavigate?: (
+    tab: "home" | "store" | "loyalty" | "wallet" | "cart" | "profile",
+  ) => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
   activeTab = "home",
-  onNavigate = () => {},
+  onNavigate = (tab) => {
+    // Handle navigation based on tab
+    switch (tab) {
+      case "home":
+        window.location.href = "/";
+        break;
+      case "store":
+        window.location.href = "/store";
+        break;
+      case "loyalty":
+        window.location.href = "/";
+        break;
+      case "wallet":
+        window.location.href = "/";
+        break;
+      case "cart":
+        window.location.href = "/cart";
+        break;
+      case "profile":
+        window.location.href = "/profile";
+        break;
+      default:
+        window.location.href = "/";
+    }
+  },
 }) => {
   const tabs = [
     { id: "home", label: "الرئيسية", icon: <Home className="h-5 w-5" /> },
@@ -19,7 +52,11 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       icon: <Gift className="h-5 w-5" />,
     },
     { id: "wallet", label: "المحفظة", icon: <Wallet className="h-5 w-5" /> },
-    { id: "cart", label: "السلة", icon: <ShoppingCart className="h-5 w-5" /> },
+    {
+      id: "cart",
+      label: "السلة",
+      icon: <ShoppingCart className="h-5 w-5" />,
+    },
   ];
 
   return (

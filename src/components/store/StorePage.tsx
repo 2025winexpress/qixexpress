@@ -11,8 +11,8 @@ const StorePage = () => {
 
   // User information (mock data)
   const userData = {
-    name: "Jane Smith",
-    level: "Gold Member",
+    name: "جين سميث",
+    level: "عضو ذهبي",
     points: 1250,
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
     notificationCount: 3,
@@ -25,21 +25,38 @@ const StorePage = () => {
   const handleNavigate = (
     view: "discovery" | "dashboard" | "wallet" | "store" | "home",
   ) => {
-    // This would handle navigation in a real app
-    console.log(`Navigating to ${view}`);
+    // Handle navigation based on view
+    switch (view) {
+      case "home":
+        window.location.href = "/";
+        break;
+      case "discovery":
+        window.location.href = "/";
+        break;
+      case "dashboard":
+        window.location.href = "/";
+        break;
+      case "wallet":
+        window.location.href = "/";
+        break;
+      case "store":
+        window.location.href = "/store";
+        break;
+      default:
+        window.location.href = "/";
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
-        activeTab="home"
+        activeTab="store"
         onTabChange={() => {}}
         userName={userData.name}
         userAvatar={userData.avatar}
         notificationCount={userData.notificationCount}
         onNavigate={handleNavigate}
       />
-
       <main className="container mx-auto py-6 px-4 pb-20">
         <ProductCategories
           activeCategory={activeCategory}

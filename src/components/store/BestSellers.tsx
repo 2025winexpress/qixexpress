@@ -7,7 +7,6 @@ import ProductDetailsDialog from "./ProductDetailsDialog";
 interface Product {
   id: string;
   name: string;
-  description: string;
   price: number;
   coinPrice: number;
   imageUrl: string;
@@ -23,47 +22,43 @@ const BestSellers: React.FC<BestSellersProps> = ({
   products = [
     {
       id: "best1",
-      name: "قهوة تركية",
-      description: "قهوة تركية أصلية محضرة على الرمل",
-      price: 25,
-      coinPrice: 100,
-      imageUrl:
-        "https://images.unsplash.com/photo-1578374173705-969cbe6f2d6b?w=400&q=80",
-      rating: 4.8,
-      reviewCount: 120,
-    },
-    {
-      id: "best2",
-      name: "كروسان بالشوكولاتة",
-      description: "كروسان طازج محشو بالشوكولاتة البلجيكية",
-      price: 35,
-      coinPrice: 150,
-      imageUrl:
-        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80",
-      rating: 4.6,
-      reviewCount: 85,
-    },
-    {
-      id: "best3",
-      name: "لاتيه بالكراميل",
-      description: "قهوة لاتيه مع شراب الكراميل والكريمة",
+      name: "قهوة عربية",
       price: 30,
       coinPrice: 120,
       imageUrl:
-        "https://images.unsplash.com/photo-1572286258217-215f6d8bb578?w=400&q=80",
+        "https://images.unsplash.com/photo-1578374173705-969cbe6f2d6b?w=400&q=80",
+      rating: 4.8,
+      reviewCount: 124,
+    },
+    {
+      id: "best2",
+      name: "كيك الشوكولاتة",
+      price: 45,
+      coinPrice: 180,
+      imageUrl:
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80",
       rating: 4.7,
-      reviewCount: 95,
+      reviewCount: 89,
+    },
+    {
+      id: "best3",
+      name: "كروسان بالجبن",
+      price: 35,
+      coinPrice: 140,
+      imageUrl:
+        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80",
+      rating: 4.6,
+      reviewCount: 76,
     },
     {
       id: "best4",
-      name: "شاي أخضر بالنعناع",
-      description: "شاي أخضر منعش مع أوراق النعناع الطازجة",
-      price: 20,
-      coinPrice: 80,
+      name: "شاي بالنعناع",
+      price: 25,
+      coinPrice: 100,
       imageUrl:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&q=80",
-      rating: 4.5,
-      reviewCount: 75,
+        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80",
+      rating: 4.9,
+      reviewCount: 142,
     },
   ],
 }) => {

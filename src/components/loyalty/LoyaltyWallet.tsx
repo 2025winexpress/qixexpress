@@ -102,23 +102,23 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
   };
 
   return (
-    <div className="w-full bg-white p-6 rounded-lg shadow-md">
+    <div className="w-full bg-white p-6 rounded-lg shadow-md" dir="rtl">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
           <Coins className="mr-2 text-yellow-600" />
-          Loyalty Wallet
+          محفظة الولاء
         </h2>
         <p className="text-gray-600">
-          Manage your coins and view transaction history.
+          إدارة الكوينز الخاصة بك وعرض سجل المعاملات.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card className="col-span-1 md:col-span-2 border-2 border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50">
           <CardHeader>
-            <CardTitle>Coin Balance</CardTitle>
+            <CardTitle>رصيد الكوينز</CardTitle>
             <CardDescription>
-              Your available coins for transfers and purchases
+              الكوينز المتاحة للتحويلات والمشتريات
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -134,27 +134,27 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
             >
               <Send className="mr-2 h-4 w-4" />
-              Transfer Coins
+              تحويل الكوينز
             </Button>
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
+            <CardTitle>إحصائيات سريعة</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Earned</span>
+                <span className="text-sm text-gray-600">إجمالي المكتسب</span>
                 <span className="font-medium text-green-600">2,500</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Spent</span>
+                <span className="text-sm text-gray-600">إجمالي المنفق</span>
                 <span className="font-medium text-red-600">1,250</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Net Transfers</span>
+                <span className="text-sm text-gray-600">صافي التحويلات</span>
                 <span className="font-medium text-blue-600">+250</span>
               </div>
             </div>
@@ -164,19 +164,19 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
 
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle>سجل المعاملات</CardTitle>
           <CardDescription>
-            Recent activity in your loyalty wallet
+            النشاط الأخير في محفظة الولاء الخاصة بك
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>التاريخ</TableHead>
+                <TableHead>الوصف</TableHead>
+                <TableHead>النوع</TableHead>
+                <TableHead className="text-right">المبلغ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,12 +199,12 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
                       }`}
                     >
                       {transaction.type === "earned"
-                        ? "Earned"
+                        ? "مكتسب"
                         : transaction.type === "spent"
-                          ? "Spent"
+                          ? "منفق"
                           : transaction.type === "transferred"
-                            ? "Transferred"
-                            : "Received"}
+                            ? "محول"
+                            : "مستلم"}
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-medium">
@@ -236,34 +236,34 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Transfer Coins</DialogTitle>
+            <DialogTitle>تحويل الكوينز</DialogTitle>
             <DialogDescription>
-              Send coins to another user from your balance.
+              أرسل الكوينز إلى مستخدم آخر من رصيدك.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient Username</Label>
+              <Label htmlFor="recipient">اسم المستخدم المستلم</Label>
               <Input
                 id="recipient"
-                placeholder="Enter username"
+                placeholder="أدخل اسم المستخدم"
                 value={recipientUsername}
                 onChange={(e) => setRecipientUsername(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">المبلغ</Label>
               <Input
                 id="amount"
                 type="number"
-                placeholder="Enter amount"
+                placeholder="أدخل المبلغ"
                 value={transferAmount}
                 onChange={(e) => setTransferAmount(e.target.value)}
                 min="1"
                 max={coinBalance.toString()}
               />
               <p className="text-xs text-gray-500">
-                Available balance: {coinBalance} coins
+                الرصيد المتاح: {coinBalance} كوينز
               </p>
             </div>
           </div>
@@ -272,7 +272,7 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
               variant="outline"
               onClick={() => setIsTransferDialogOpen(false)}
             >
-              Cancel
+              إلغاء
             </Button>
             <Button
               onClick={handleTransfer}
@@ -284,7 +284,7 @@ const LoyaltyWallet: React.FC<LoyaltyWalletProps> = ({
               }
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
             >
-              Transfer
+              تحويل
             </Button>
           </DialogFooter>
         </DialogContent>

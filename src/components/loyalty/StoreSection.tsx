@@ -106,10 +106,10 @@ const StoreSection: React.FC<StoreSectionProps> = ({
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
           <ShoppingBag className="mr-2 text-green-600" />
-          Store
+          المنتجات المميزة
         </h2>
         <p className="text-gray-600">
-          Browse our merchandise and redeem with cash or loyalty coins.
+          تصفح منتجاتنا المميزة واستبدلها بالنقود أو نقاط الولاء.
         </p>
         <div className="mt-2 bg-yellow-50 p-2 rounded-md inline-block">
           <p className="text-sm flex items-center">
@@ -149,7 +149,7 @@ const StoreSection: React.FC<StoreSectionProps> = ({
                   </p>
                 </div>
                 <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                  View
+                  إضافة
                 </Button>
               </div>
             </CardContent>

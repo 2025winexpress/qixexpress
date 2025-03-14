@@ -21,18 +21,23 @@ const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({
   const renderTabContent = () => {
     switch (activeTab) {
       case "rewards":
-        return <RewardsSection />;
+        return <RewardsSection onBack={() => setActiveTab("discovery")} />;
       case "giftcards":
-        return <GiftCardSection />;
+        return <GiftCardSection onBack={() => setActiveTab("discovery")} />;
       case "coins":
-        return <CoinsSection coinBalance={coinBalance} />;
+        return (
+          <CoinsSection
+            coinBalance={coinBalance}
+            onBack={() => setActiveTab("discovery")}
+          />
+        );
       default:
         return <RewardsSection />;
     }
   };
 
   return (
-    <div className="w-full bg-white p-6 rounded-lg shadow-md">
+    <div className="w-full bg-white p-6 rounded-lg shadow-md" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">
         لوحة برنامج الولاء
       </h1>

@@ -10,7 +10,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Coins, ArrowRight, Send, CreditCard, ShoppingBag } from "lucide-react";
+import {
+  Coins,
+  ArrowRight,
+  Send,
+  CreditCard,
+  ShoppingBag,
+  Plus,
+} from "lucide-react";
 
 interface CoinTransaction {
   id: string;
@@ -23,9 +30,11 @@ interface CoinTransaction {
 interface CoinsSectionProps {
   coinBalance?: number;
   transactions?: CoinTransaction[];
+  onBack?: () => void;
 }
 
 const CoinsSection: React.FC<CoinsSectionProps> = ({
+  onBack = () => {},
   coinBalance = 1250,
   transactions = [
     {
@@ -129,14 +138,6 @@ const CoinsSection: React.FC<CoinsSectionProps> = ({
           <Coins className="mr-2 text-yellow-600" />
           كوينز الولاء
         </h2>
-        <Button
-          variant="outline"
-          className="border-yellow-600 text-yellow-600 hover:bg-yellow-50"
-          onClick={() => setIsTransferDialogOpen(true)}
-        >
-          <Send className="mr-2 h-4 w-4" />
-          تحويل كوينز
-        </Button>
       </div>
 
       <Card className="border-2 border-yellow-100 bg-gradient-to-r from-yellow-50 to-amber-50">
@@ -165,83 +166,15 @@ const CoinsSection: React.FC<CoinsSectionProps> = ({
               <Button
                 variant="outline"
                 className="border-yellow-500 text-yellow-600 hover:bg-yellow-50"
-                onClick={() => setIsRedeemDialogOpen(true)}
+                onClick={onBack}
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                استبدال الكوينز
+                <Plus className="mr-2 h-4 w-4" />
+                إضافة بطاقة كوينز
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <div className="mt-6">
-        <h3 className="font-semibold text-gray-800 mb-4">استبدال الكوينز</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">قهوة مجانية</h4>
-                <span className="text-sm font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full flex items-center">
-                  <Coins className="h-3 w-3 mr-1" />
-                  500
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                استبدل 500 كوينز للحصول على قهوة مجانية من اختيارك
-              </p>
-              <Button
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-                disabled={coinBalance < 500}
-              >
-                استبدال
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">خصم 25%</h4>
-                <span className="text-sm font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full flex items-center">
-                  <Coins className="h-3 w-3 mr-1" />
-                  750
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                استبدل 750 كوينز للحصول على خصم 25% على طلبك التالي
-              </p>
-              <Button
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-                disabled={coinBalance < 750}
-              >
-                استبدال
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">كوب حصري</h4>
-                <span className="text-sm font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full flex items-center">
-                  <Coins className="h-3 w-3 mr-1" />
-                  1000
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                استبدل 1000 كوينز للحصول على كوب قهوة حصري قابل لإعادة الاستخدام
-              </p>
-              <Button
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-                disabled={coinBalance < 1000}
-              >
-                استبدال
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
 
       <div className="mt-6">
         <h3 className="font-semibold text-gray-800 mb-4 flex items-center">

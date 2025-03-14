@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -7,31 +6,35 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Progress } from "../ui/progress";
-import { Coins, Gift, Award, Plus } from "lucide-react";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Award, Gift, Coins, Plus, Check, Calendar } from "lucide-react";
 
 type CardType = "rewards" | "gift" | "coins";
 
 interface CardDetailsProps {
-  cardNumber?: string;
-  cardType?: CardType;
-  balance?: number;
+  cardNumber: string;
+  cardType: CardType;
+  balance: number;
   expiryDate?: string;
   isVerified?: boolean;
   onAddToAccount?: () => void;
 }
 
-const CardDetails = ({
-  cardNumber = "1234 5678 9012 3456",
-  cardType = "rewards",
-  balance = 0,
+const CardDetails: React.FC<CardDetailsProps> = ({
+  cardNumber,
+  cardType,
+  balance,
   expiryDate = "12/2025",
-  isVerified = true,
-  onAddToAccount = () => console.log("Add to account clicked"),
-}: CardDetailsProps) => {
-  // Determine card icon and color based on type
+  isVerified = false,
+  onAddToAccount = () => {},
+}) => {
+  const formatCardNumber = (number: string) => {
+    // Show only last 4 digits for security
+    return "**** **** **** " + (number ? number.slice(-4) : "****");
+  };
+
   const getCardIcon = () => {
     switch (cardType) {
       case "rewards":
@@ -45,72 +48,48 @@ const CardDetails = ({
     }
   };
 
-  const getCardBadgeColor = () => {
-    switch (cardType) {
-      case "rewards":
-        return "bg-green-100 text-green-800";
-      case "gift":
-        return "bg-purple-100 text-purple-800";
-      case "coins":
-        return "bg-amber-100 text-amber-800";
-      default:
-        return "bg-green-100 text-green-800";
-    }
-  };
-
   const getCardTitle = () => {
     switch (cardType) {
       case "rewards":
-        return "Rewards Card";
+        return "بطاقة المكافآت";
       case "gift":
-        return "Gift Card";
+        return "بطاقة الهدية";
       case "coins":
-        return "Coins Card";
+        return "بطاقة الكوينز";
       default:
-        return "Rewards Card";
+        return "بطاقة";
     }
   };
 
-  const formatCardNumber = (number: string) => {
-    // Format the card number with spaces every 4 digits
-    return number
-      .replace(/\s/g, "")
-      .replace(/(.{4})/g, "$1 ")
-      .trim();
-  };
-
   return (
-    <Card className="w-full max-w-md mx-auto bg-white shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div>
+    <Card className="w-full bg-white shadow-sm">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="text-right">
           <CardTitle className="text-xl font-bold">{getCardTitle()}</CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Card #{formatCardNumber(cardNumber)}
+            بطاقة #{formatCardNumber(cardNumber)}
           </CardDescription>
         </div>
-        <Badge className={getCardBadgeColor()}>
-          {cardType.charAt(0).toUpperCase() + cardType.slice(1)}
-        </Badge>
       </CardHeader>
       <CardContent className="pt-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             {getCardIcon()}
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Balance</p>
+            <div className="mr-4 text-right">
+              <p className="text-sm font-medium text-gray-500">الرصيد</p>
               {cardType === "coins" ? (
                 <p className="text-2xl font-bold text-amber-500">
-                  {balance} Coins
+                  {balance} كوينز
                 </p>
               ) : cardType === "gift" ? (
                 <p className="text-2xl font-bold text-purple-600">
-                  ${balance.toFixed(2)}
+                  {balance.toFixed(2)} درهم
                 </p>
               ) : (
                 <div className="w-full mt-2">
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">
-                      {balance}/10 Stamps
+                      {balance}/10 طوابع
                     </span>
                   </div>
                   <Progress value={balance * 10} className="h-2 bg-gray-200" />
@@ -122,23 +101,33 @@ const CardDetails = ({
 
         {cardType === "gift" && (
           <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">Valid until: {expiryDate}</p>
+            <p className="text-sm text-gray-600 text-right flex items-center justify-end">
+              <Calendar className="h-4 w-4 ml-2" />
+              صالحة حتى: {expiryDate}
+            </p>
           </div>
         )}
 
         {cardType === "rewards" && (
           <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
-              {10 - balance} more stamps until your next free reward!
+            <p className="text-sm text-gray-600 text-right">
+              {10 - balance} طوابع أخرى حتى مكافأتك المجانية التالية!
             </p>
           </div>
         )}
 
         {cardType === "coins" && (
           <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
-              Coins can be used for exclusive merchandise and special offers.
+            <p className="text-sm text-gray-600 text-right">
+              يمكن استخدام الكوينز للحصول على بضائع حصرية وعروض خاصة.
             </p>
+          </div>
+        )}
+
+        {isVerified && (
+          <div className="mt-4 flex items-center justify-center text-green-600">
+            <Check className="h-4 w-4 mr-1" />
+            <span className="text-sm">تم التحقق من البطاقة</span>
           </div>
         )}
       </CardContent>
@@ -154,8 +143,8 @@ const CardDetails = ({
                 : "secondary"
           }
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Add to My Account
+          <Plus className="ml-2 h-4 w-4" />
+          إضافة إلى حسابي
         </Button>
       </CardFooter>
     </Card>

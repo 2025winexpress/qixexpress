@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./loyalty/Header";
 import CardDiscovery from "./loyalty/CardDiscovery";
 import LoyaltyDashboard from "./loyalty/LoyaltyDashboard";
 import LoyaltyWallet from "./loyalty/LoyaltyWallet";
-import StoreSection from "./loyalty/StoreSection";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag, Coins } from "lucide-react";
 import LoyaltyOverview from "./loyalty/LoyaltyOverview";
 import { Toaster } from "../components/ui/toaster";
 import MobileNavigation from "./layout/MobileNavigation";
+import StorePage from "./store/StorePage";
+import { useToast } from "@/components/ui/use-toast";
 
 type CardType = "rewards" | "gift" | "coins";
 type ActiveView = "discovery" | "dashboard" | "wallet" | "store" | "home";
@@ -31,6 +35,7 @@ const Home = () => {
       dateAdded: "2023-06-10",
     },
   ]);
+  const { toast } = useToast();
 
   // User information (mock data)
   const userData = {
@@ -40,6 +45,25 @@ const Home = () => {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
     notificationCount: 3,
   };
+
+  // Show welcome notification on first load and redirect to login if not logged in
+  useEffect(() => {
+    // Check if user is logged in (for demo purposes, we'll assume they are)
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+    if (!isLoggedIn) {
+      // For demo purposes, we'll set this to true to avoid constant redirects
+      localStorage.setItem("isLoggedIn", "true");
+      // In a real app, you would redirect to login here
+      // window.location.href = '/login';
+    }
+
+    toast({
+      title: "مرحباً بك في برنامج الولاء",
+      description: "استكشف المكافآت والهدايا والكوينز في حسابك",
+      variant: "default",
+    });
+  }, []);
 
   const handleTabChange = (tab: "discovery" | "dashboard") => {
     setActiveView(tab);
@@ -56,10 +80,43 @@ const Home = () => {
 
     // Automatically switch to dashboard after adding a card
     setActiveView("dashboard");
+
+    // Show success notification
+    const cardTypeText =
+      cardType === "rewards"
+        ? "المكافآت"
+        : cardType === "gift"
+          ? "الهدية"
+          : "الكوينز";
+
+    toast({
+      title: "تمت إضافة البطاقة بنجاح",
+      description: `تمت إضافة بطاقة ${cardTypeText} إلى حسابك`,
+      variant: "default",
+    });
   };
 
   const handleNavigate = (view: ActiveView) => {
+    if (view === "store") {
+      window.location.href = "/store";
+      return;
+    } else if (view === "cart") {
+      window.location.href = "/cart";
+      return;
+    } else if (view === "profile") {
+      window.location.href = "/profile";
+      return;
+    }
     setActiveView(view);
+  };
+
+  const handleLogout = () => {
+    toast({
+      title: "تم تسجيل الخروج",
+      description: "تم تسجيل خروجك بنجاح",
+      variant: "default",
+    });
+    // في تطبيق حقيقي، هنا سيتم تنفيذ عملية تسجيل الخروج
   };
 
   const renderContent = () => {
@@ -78,20 +135,119 @@ const Home = () => {
               onViewDashboard={() => setActiveView("dashboard")}
             />
             <div className="mt-8">
-              <StoreSection coinBalance={userData.points} />
+              <div className="w-full bg-white p-6 rounded-lg shadow-md">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
+                    <ShoppingBag className="mr-2 text-green-600" />
+                    منتجات مميزة
+                  </h2>
+                  <p className="text-gray-600">
+                    تصفح مجموعة من منتجاتنا المميزة واستمتع بتجربة تسوق فريدة.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[
+                    {
+                      id: "prod1",
+                      name: "قهوة عربية فاخرة",
+                      description: "قهوة عربية أصلية مع هيل",
+                      price: 35,
+                      coinPrice: 150,
+                      imageUrl:
+                        "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80",
+                    },
+                    {
+                      id: "prod2",
+                      name: "كيك الشوكولاتة",
+                      description: "كيك شوكولاتة بلجيكية فاخرة",
+                      price: 45,
+                      coinPrice: 180,
+                      imageUrl:
+                        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80",
+                    },
+                    {
+                      id: "prod3",
+                      name: "شاي أخضر بالنعناع",
+                      description: "شاي أخضر طازج مع نعناع طبيعي",
+                      price: 25,
+                      coinPrice: 100,
+                      imageUrl:
+                        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80",
+                    },
+                    {
+                      id: "prod4",
+                      name: "كروسان بالجبن",
+                      description: "كروسان طازج محشو بالجبن",
+                      price: 30,
+                      coinPrice: 120,
+                      imageUrl:
+                        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80",
+                    },
+                  ].map((product) => (
+                    <Card
+                      key={product.id}
+                      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => (window.location.href = "/store")}
+                    >
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-3">
+                        <h3 className="font-medium text-right">
+                          {product.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 text-right">
+                          {product.description}
+                        </p>
+                        <div className="flex justify-between items-center mt-2">
+                          <div className="flex items-center text-xs text-yellow-600">
+                            <Coins className="h-3 w-3 mr-1" />
+                            {product.coinPrice}
+                          </div>
+                          <p className="font-bold text-green-600 text-right">
+                            {product.price} درهم
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="mt-6 text-center">
+                  <Button
+                    onClick={() => (window.location.href = "/store")}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    عرض جميع المنتجات
+                  </Button>
+                </div>
+              </div>
             </div>
           </>
         );
       case "discovery":
-        return <CardDiscovery onCardAdded={handleCardAdded} />;
+        return (
+          <CardDiscovery
+            onCardAdded={handleCardAdded}
+            onBack={() => setActiveView("home")}
+          />
+        );
       case "dashboard":
         return <LoyaltyDashboard coinBalance={userData.points} />;
       case "wallet":
         return <LoyaltyWallet coinBalance={userData.points} />;
       case "store":
-        return <StoreSection coinBalance={userData.points} />;
+        return <StorePage />;
       default:
-        return <CardDiscovery onCardAdded={handleCardAdded} />;
+        return (
+          <CardDiscovery
+            onCardAdded={handleCardAdded}
+            onBack={() => setActiveView("home")}
+          />
+        );
     }
   };
 
@@ -110,6 +266,7 @@ const Home = () => {
         userAvatar={userData.avatar}
         notificationCount={userData.notificationCount}
         onNavigate={handleNavigate}
+        onLogout={handleLogout}
       />
 
       <main className="container mx-auto py-6 px-4 pb-20">
@@ -124,7 +281,9 @@ const Home = () => {
               ? "wallet"
               : activeView === "dashboard"
                 ? "loyalty"
-                : "home"
+                : activeView === "discovery"
+                  ? "loyalty"
+                  : "home"
         }
         onNavigate={(tab) => {
           if (tab === "loyalty") {

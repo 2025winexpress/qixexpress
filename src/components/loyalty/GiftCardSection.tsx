@@ -23,9 +23,11 @@ interface GiftCard {
 
 interface GiftCardSectionProps {
   giftCards?: GiftCard[];
+  onBack?: () => void;
 }
 
 const GiftCardSection: React.FC<GiftCardSectionProps> = ({
+  onBack = () => {},
   giftCards = [
     {
       id: "gift1",
@@ -101,7 +103,7 @@ const GiftCardSection: React.FC<GiftCardSectionProps> = ({
           <Gift className="mr-2 text-purple-600" />
           بطاقات الهدايا
         </h2>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button className="bg-purple-600 hover:bg-purple-700" onClick={onBack}>
           <Plus className="mr-2 h-4 w-4" />
           إضافة بطاقة هدية
         </Button>
@@ -140,7 +142,7 @@ const GiftCardSection: React.FC<GiftCardSectionProps> = ({
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-purple-800 flex items-center">
                           <Gift className="mr-2 h-5 w-5 text-purple-600" />
-                          {card.name}
+                          {card.id} - {card.name}
                         </h3>
                         <span
                           className={`text-sm font-medium px-2 py-1 rounded-full ${card.isRedeemed ? "bg-gray-100 text-gray-800" : expired ? "bg-red-100 text-red-800" : "bg-purple-100 text-purple-800"}`}
@@ -168,13 +170,33 @@ const GiftCardSection: React.FC<GiftCardSectionProps> = ({
                       </div>
 
                       <div className="flex justify-end">
-                        <Button
-                          onClick={() => handleRedeemCard(card)}
-                          className={`${card.isRedeemed || expired ? "bg-gray-400 hover:bg-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"}`}
-                          disabled={card.isRedeemed || expired}
-                        >
-                          {card.isRedeemed ? "تم الاستخدام" : "استخدام البطاقة"}
-                        </Button>
+                        <div className="flex space-x-2 rtl:space-x-reverse">
+                          <Button
+                            onClick={() => {
+                              toast({
+                                title: "كيفية استخدام البطاقة",
+                                description:
+                                  "المرحلة الأولى: قم بالطلب عبر التطبيق. المرحلة الثانية: قم بتحديد الهدية في قسم برنامج الولاء في السلة. المرحلة الثالثة: سيتم إرسال الهدية مع الطلب.",
+                                variant: "default",
+                              });
+                            }}
+                            variant="outline"
+                            className="text-purple-600 border-purple-600"
+                            size="sm"
+                          >
+                            كيفية الاستخدام
+                          </Button>
+                          <Button
+                            onClick={() => handleRedeemCard(card)}
+                            className={`${card.isRedeemed || expired ? "bg-gray-400 hover:bg-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"}`}
+                            disabled={card.isRedeemed || expired}
+                            size="sm"
+                          >
+                            {card.isRedeemed
+                              ? "تم الاستخدام"
+                              : "استخدام البطاقة"}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
