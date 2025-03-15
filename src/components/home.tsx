@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "./loyalty/Header";
 import CardDiscovery from "./loyalty/CardDiscovery";
 import LoyaltyDashboard from "./loyalty/LoyaltyDashboard";
@@ -7,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Coins } from "lucide-react";
 import LoyaltyOverview from "./loyalty/LoyaltyOverview";
-import { Toaster } from "../components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import MobileNavigation from "./layout/MobileNavigation";
 import StorePage from "./store/StorePage";
 import { useToast } from "@/components/ui/use-toast";
@@ -36,6 +37,7 @@ const Home = () => {
     },
   ]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // User information (mock data)
   const userData = {
@@ -46,24 +48,40 @@ const Home = () => {
     notificationCount: 3,
   };
 
-  // Show welcome notification on first load and redirect to login if not logged in
+  // Check if user is logged in
   useEffect(() => {
-    // Check if user is logged in (for demo purposes, we'll assume they are)
+    // Check if user is logged in
     const isLoggedIn = localStorage.getItem("isLoggedIn");
 
     if (!isLoggedIn) {
-      // For demo purposes, we'll set this to true to avoid constant redirects
-      localStorage.setItem("isLoggedIn", "true");
-      // In a real app, you would redirect to login here
-      // window.location.href = '/login';
+      // Redirect to login if not logged in
+      navigate("/login");
+      return;
     }
+
+    // Listen for custom events from MobileNavigation
+    const handleSetActiveView = (event: CustomEvent) => {
+      setActiveView(event.detail as ActiveView);
+    };
+
+    window.addEventListener(
+      "setActiveView",
+      handleSetActiveView as EventListener,
+    );
 
     toast({
       title: "مرحباً بك في برنامج الولاء",
       description: "استكشف المكافآت والهدايا والكوينز في حسابك",
       variant: "default",
     });
-  }, []);
+
+    return () => {
+      window.removeEventListener(
+        "setActiveView",
+        handleSetActiveView as EventListener,
+      );
+    };
+  }, [navigate]);
 
   const handleTabChange = (tab: "discovery" | "dashboard") => {
     setActiveView(tab);
@@ -98,13 +116,13 @@ const Home = () => {
 
   const handleNavigate = (view: ActiveView) => {
     if (view === "store") {
-      window.location.href = "/store";
+      navigate("/store", { replace: true });
       return;
     } else if (view === "cart") {
-      window.location.href = "/cart";
+      navigate("/cart", { replace: true });
       return;
     } else if (view === "profile") {
-      window.location.href = "/profile";
+      navigate("/profile", { replace: true });
       return;
     }
     setActiveView(view);
@@ -187,7 +205,7 @@ const Home = () => {
                     <Card
                       key={product.id}
                       className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => (window.location.href = "/store")}
+                      onClick={() => navigate("/store")}
                     >
                       <div className="h-48 overflow-hidden">
                         <img
@@ -218,7 +236,7 @@ const Home = () => {
                 </div>
                 <div className="mt-6 text-center">
                   <Button
-                    onClick={() => (window.location.href = "/store")}
+                    onClick={() => navigate("/store")}
                     className="bg-green-600 hover:bg-green-700"
                   >
                     عرض جميع المنتجات
@@ -285,13 +303,6 @@ const Home = () => {
                   ? "loyalty"
                   : "home"
         }
-        onNavigate={(tab) => {
-          if (tab === "loyalty") {
-            setActiveView("dashboard");
-          } else {
-            setActiveView(tab as ActiveView);
-          }
-        }}
       />
 
       <footer className="bg-white border-t border-gray-200 py-6 mt-12">

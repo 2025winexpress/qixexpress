@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,14 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -23,14 +31,16 @@ const LoginPage = () => {
       setIsLoading(false);
 
       // For demo purposes, we'll always succeed
+      localStorage.setItem("isLoggedIn", "true");
+
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك في برنامج الولاء",
         variant: "default",
       });
 
-      navigate("/");
-    }, 1500);
+      navigate("/", { replace: true });
+    }, 1000);
   };
 
   return (

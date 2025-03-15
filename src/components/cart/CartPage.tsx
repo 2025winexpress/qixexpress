@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../loyalty/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,15 @@ interface DeliveryTimeSlot {
 
 const CartPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   // User information (mock data)
   const userData = {
@@ -192,10 +202,50 @@ const CartPage = () => {
   const [requestReward, setRequestReward] = useState(false);
 
   const handleNavigate = (
-    view: "discovery" | "dashboard" | "wallet" | "store" | "home",
+    view: "discovery" | "dashboard" | "wallet" | "store" | "home" | "profile",
   ) => {
-    // This would handle navigation in a real app
-    console.log(`Navigating to ${view}`);
+    // Handle navigation based on view
+    switch (view) {
+      case "home":
+        navigate("/", { replace: true });
+        break;
+      case "discovery":
+        navigate("/", { replace: true });
+        // Set the active view to discovery in the Home component
+        setTimeout(() => {
+          const event = new CustomEvent("setActiveView", {
+            detail: "discovery",
+          });
+          window.dispatchEvent(event);
+        }, 100);
+        break;
+      case "dashboard":
+        navigate("/", { replace: true });
+        // Set the active view to dashboard in the Home component
+        setTimeout(() => {
+          const event = new CustomEvent("setActiveView", {
+            detail: "dashboard",
+          });
+          window.dispatchEvent(event);
+        }, 100);
+        break;
+      case "wallet":
+        navigate("/", { replace: true });
+        // Set the active view to wallet in the Home component
+        setTimeout(() => {
+          const event = new CustomEvent("setActiveView", { detail: "wallet" });
+          window.dispatchEvent(event);
+        }, 100);
+        break;
+      case "store":
+        navigate("/store", { replace: true });
+        break;
+      case "profile":
+        navigate("/profile", { replace: true });
+        break;
+      default:
+        navigate("/", { replace: true });
+    }
   };
 
   const updateQuantity = (id: string, newQuantity: number) => {

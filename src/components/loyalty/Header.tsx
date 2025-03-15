@@ -7,7 +7,7 @@ import {
   Bell,
   LogOut,
   Home,
-  ShoppingBag,
+  Utensils,
   Wallet,
   Menu,
   Plus,
@@ -53,10 +53,16 @@ const CartBadge = () => {
 };
 
 interface HeaderProps {
-  activeTab?: "discovery" | "dashboard" | "home";
+  activeTab?:
+    | "discovery"
+    | "dashboard"
+    | "home"
+    | "store"
+    | "wallet"
+    | "profile";
   onTabChange?: (tab: "discovery" | "dashboard") => void;
   onNavigate?: (
-    view: "discovery" | "dashboard" | "wallet" | "store" | "home",
+    view: "discovery" | "dashboard" | "wallet" | "store" | "home" | "profile",
   ) => void;
   userName?: string;
   userAvatar?: string;
@@ -84,6 +90,9 @@ const Header = ({
         break;
       case "store":
         window.location.href = "/store";
+        break;
+      case "profile":
+        window.location.href = "/profile";
         break;
       default:
         window.location.href = "/";
@@ -150,8 +159,8 @@ const Header = ({
           className="flex items-center text-gray-600 hover:text-gray-900"
           onClick={() => onNavigate("store")}
         >
-          <ShoppingBag className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
-          المتجر
+          <Utensils className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
+          الطعام
         </Button>
       </nav>
 
